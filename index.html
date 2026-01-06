@@ -10,29 +10,8 @@
 * { box-sizing: border-box; margin:0; padding:0; }
 body { font-family:'Inter',system-ui; background:#0b0b0b; color:#fff; }
 
-/* ================= ENTRY OVERLAY ================= */
-#entryOverlay {
-  position:fixed; top:0; left:0; width:100%; height:100%;
-  background:#0b0b0b; display:flex; flex-direction:column;
-  justify-content:center; align-items:center; z-index:9999;
-}
-#entryOverlay input {
-  padding:10px 14px; border-radius:12px; border:none;
-  font-family:'Fira Mono',monospace; font-size:16px;
-}
-#entryOverlay button {
-  margin-top:10px; padding:10px 18px; font-weight:bold; border-radius:12px;
-  border:none; cursor:pointer; background:#0ff; color:#000; font-family:'Fira Mono',monospace;
-}
-#entryError { color:#ff5555; font-family:monospace; margin-top:8px; }
-
-/* ================= MAIN CONTAINER ================= */
-#main-content { display:none; }
-
-header {
-  text-align:center; font-weight:900; font-size:3rem; padding:28px 0; color:#fff;
-  text-shadow:0 0 3px #fff,0 0 6px #fff,0 0 10px #fff;
-}
+#main-content { display:block; }
+header { text-align:center; font-weight:900; font-size:3rem; padding:28px 0; color:#fff; text-shadow:0 0 3px #fff,0 0 6px #fff,0 0 10px #fff; }
 
 .container {
   max-width:900px; margin:40px auto; padding:30px; background:#111;
@@ -40,66 +19,97 @@ header {
   box-shadow:0 0 15px rgba(255,255,255,0.12),0 0 30px rgba(255,255,255,0.08);
 }
 
-.password-row { display:flex; align-items:center; gap:16px; font-size:0.9rem; color:#fff; }
+/* PASSWORD ROW */
+.password-row { display:flex; align-items:center; gap:16px; font-size:0.9rem; color:#fff; position:relative; }
 .password-row span { min-width:120px; }
 .password-row input {
   flex-grow:1; background:#000; border:1.5px solid transparent; color:#fff;
-  padding:10px 14px; border-radius:12px; font-family:'Fira Mono',monospace;
+  padding:10px 40px 10px 14px; border-radius:12px; font-family:'Fira Mono',monospace;
   transition: all 0.3s ease;
 }
 .password-row input:hover,
-.password-row input:focus { border-color:#fff; box-shadow:0 0 8px #fff55; }
+.password-row input:focus { border-color:#fff; }
 
-.show-pass { font-size:0.85rem; cursor:pointer; opacity:.7; user-select:none; }
+/* Eye inside input */
+.eye-wrapper {
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  width:24px; height:24px; cursor:pointer;
+}
+.eye-wrapper img {
+  width:100%; height:100%;
+  display:block;
+}
+.eye-wrapper .eye-slash {
+  position:absolute;
+  top:50%; left:-2px; width:28px; height:3px;
+  background:#fff;  /* white slash */
+  transform: rotate(45deg) translateY(-50%);
+  transform-origin: center;
+  pointer-events:none;
+  display:none;
+  border-radius:1px;
+}
 
+/* PASSWORD STRENGTH */
+.password-safety-bar {
+  height:6px; width:100%; border-radius:4px; background:#222; margin-top:4px;
+  overflow:hidden;
+}
+.password-safety-fill {
+  height:100%; width:0%; background:red; transition: width 0.3s, background 0.3s;
+}
+
+/* TEXTAREAS */
 textarea {
   width:100%; height:180px; background:#000; border:1.5px solid transparent;
   border-radius:14px; padding:18px; font-family:'Fira Mono',monospace;
   color:#fff; resize:vertical; outline:none; transition:all 0.3s ease;
 }
-textarea:hover, textarea:focus { border-color:#fff; box-shadow:0 0 10px #fff55; }
+textarea:hover, textarea:focus { border-color:#fff; }
 
+.output-wrapper { position:relative; }
+.copy-btn {
+  position:absolute; top:12px; right:12px;
+  width:24px; height:24px; cursor:pointer;
+}
+
+/* BUTTONS */
 .buttons { display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-top:5px; }
-
 button {
   min-width:160px; padding:14px; border-radius:9999px; font-size:16px;
   font-weight:700; cursor:pointer; border:2px solid #fff; position:relative;
   overflow:hidden; text-transform:uppercase; letter-spacing:0.1em;
   font-family:'Fira Mono',monospace; background: linear-gradient(to right, #000 50%, #fff 50%);
   color: transparent;
+  box-shadow:0 0 6px #fff, 0 0 12px #fff inset;
+  transition: box-shadow 0.2s ease;
 }
+button:hover { box-shadow:0 0 12px #fff, 0 0 24px #fff inset; }
 #modeBtn span {
   display:inline-block; background: linear-gradient(to right, #fff 50%, #000 50%);
   -webkit-background-clip: text; background-clip:text; color:transparent; font-weight:bold;
 }
-#modeBtn:hover { box-shadow:0 0 6px #fff,0 0 12px #fff inset; }
-#modeBtn:hover span { background: linear-gradient(to right, #fff 50%, #000 50%); }
-
 #errorMsg { color:#ff5555; font-weight:700; text-align:center; font-family:monospace; margin-top:6px; }
 </style>
 </head>
 <body>
 
-<!-- ================= ENTRY LOCK ================= -->
-<div id="entryOverlay">
-  <h2>Enter Site Password</h2>
-  <input type="password" id="sitePassword" placeholder="Password">
-  <button onclick="checkEntry()">Enter</button>
-  <div id="entryError"></div>
-</div>
-
-<!-- ================= MAIN CONTENT ================= -->
 <div id="main-content">
   <header>M2.encrypt</header>
-
   <div class="container">
 
     <div class="password-row">
       <span>Password:</span>
-      <input type="password" id="password" placeholder="Enter Password Here!">
-      <label class="show-pass">
-        <input type="checkbox" onclick="togglePass()"> show
-      </label>
+      <input type="password" id="password" placeholder="Enter Password Here!" oninput="updatePasswordStrength()">
+      <!-- Eye icon wrapper -->
+      <div class="eye-wrapper" id="eyeWrapper" onclick="togglePass()">
+        <img src="eye.svg" alt="Eye">
+        <div class="eye-slash" id="eyeSlash"></div>
+      </div>
+    </div>
+
+    <div class="password-safety-bar">
+      <div class="password-safety-fill" id="passwordSafetyFill"></div>
     </div>
 
     <textarea id="input" placeholder="Enter text here..."></textarea>
@@ -110,174 +120,59 @@ button {
       </button>
     </div>
 
-    <textarea id="output" placeholder="Output will appear here..." readonly></textarea>
+    <div class="output-wrapper">
+      <textarea id="output" placeholder="Output will appear here..." readonly></textarea>
+      <!-- Clipboard icon -->
+      <img class="copy-btn" id="copyBtn" src="copy.svg" onclick="copyOutput()">
+    </div>
+
     <div id="errorMsg"></div>
 
   </div>
 </div>
 
 <script>
-// ================= ENTRY LOCK =================
-const ENTRY_PASSWORD = "MC64";
-const entryOverlay = document.getElementById("entryOverlay");
-const entryError = document.getElementById("entryError");
-function checkEntry(){
-  if(document.getElementById("sitePassword").value === ENTRY_PASSWORD){
-    localStorage.setItem("entryOk","1");
-    entryOverlay.style.display="none";
-    document.getElementById("main-content").style.display="block";
-  } else entryError.textContent="Wrong entry password!";
-}
-window.onload=()=>{ 
-  if(localStorage.getItem("entryOk")){
-    entryOverlay.style.display="none";
-    document.getElementById("main-content").style.display="block";
-  }
-};
+// PASSWORD TOGGLE
+const password = document.getElementById("password");
+const eyeSlash = document.getElementById("eyeSlash");
+let showing = false;
 
-// ================= UI =================
-let useEncrypt = true;
-function togglePass(){
-  const p=document.getElementById("password");
-  p.type = p.type==="password"?"text":"password";
+function togglePass() {
+  showing = !showing;
+  password.type = showing ? "text" : "password";
+  eyeSlash.style.display = showing ? "block" : "none";
 }
-function switchMode(){
+
+// PASSWORD STRENGTH
+const passwordStrengthFill = document.getElementById("passwordSafetyFill");
+function updatePasswordStrength() {
+  const val = password.value;
+  let score = 0;
+  if(val.length >= 8) score++;
+  if(/[A-Z]/.test(val)) score++;
+  if(/[a-z]/.test(val)) score++;
+  if(/[0-9]/.test(val)) score++;
+  if(/[^A-Za-z0-9]/.test(val)) score++;
+  let percent = (score/5)*100;
+  passwordStrengthFill.style.width = percent + "%";
+  if(score <= 2) passwordStrengthFill.style.background = "red";
+  else if(score <= 4) passwordStrengthFill.style.background = "orange";
+  else passwordStrengthFill.style.background = "green";
+}
+
+// COPY OUTPUT
+function copyOutput() {
+  const output = document.getElementById("output");
+  if(output.value) navigator.clipboard.writeText(output.value);
+}
+
+// MODE BUTTON
+let useEncrypt = true;
+function switchMode() {
   useEncrypt = !useEncrypt;
   document.querySelector("#modeBtn span").textContent = useEncrypt ? "MODE: M2.ENCRYPT" : "MODE: M2.ENCODE";
-  autoProcess();
 }
-
-const input=document.getElementById("input");
-const output=document.getElementById("output");
-const errorMsg=document.getElementById("errorMsg");
-const password=document.getElementById("password");
-
-// ================= CRYPTO =================
-const SIGNATURE="MCODEv2";
-const ITER=300000;
-const enc=new TextEncoder();
-const dec=new TextDecoder();
-
-const b64e=u8=>btoa(String.fromCharCode(...u8));
-const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-
-function pack(...arrs){
-  let len=arrs.reduce((a,b)=>a+b.length,0), o=0, out=new Uint8Array(len);
-  for(const a of arrs){ out.set(a,o); o+=a.length; }
-  return out;
-}
-
-async function deriveKey(p,salt){
-  const base=await crypto.subtle.importKey(
-    "raw", enc.encode(p+SIGNATURE), "PBKDF2", false, ["deriveKey"]
-  );
-  return crypto.subtle.deriveKey(
-    {name:"PBKDF2", salt, iterations:ITER, hash:"SHA-256"},
-    base, {name:"AES-GCM", length:256}, false, ["encrypt","decrypt"]
-  );
-}
-
-// ================= SHORT B64URL =================
-const M2="M2";
-const b64url=b64=>b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-const b64urld=b64=>{
-  let s=b64.replace(/-/g,'+').replace(/_/g,'/');
-  while(s.length%4) s+='=';
-  return b64d(s);
-}
-
-// ================= ENCRYPT / DECRYPT =================
-async function encrypt(){
-  errorMsg.textContent="";
-  if(!password.value){ errorMsg.textContent="Password required"; return; }
-
-  const salt=crypto.getRandomValues(new Uint8Array(16));
-  const iv=crypto.getRandomValues(new Uint8Array(12));
-  const key=await deriveKey(password.value,salt);
-
-  const data=enc.encode(SIGNATURE+"::"+input.value);
-  const cipher=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,data);
-
-  const full=b64e(pack(salt,iv,new Uint8Array(cipher)));
-  output.value=M2+"."+b64url(full);
-  output.style.color="#0ff";
-}
-
-async function decrypt(){
-  errorMsg.textContent="";
-  if(!password.value){ errorMsg.textContent="Password required"; return; }
-  if(!input.value){ output.value=""; return; }
-
-  try{
-    const str=input.value.trim();
-    if(!str.startsWith(M2+'.')) throw "INVALID DATA";
-
-    const raw=b64urld(str.slice(M2.length+1));
-
-    if(raw.length>32){
-      const salt=raw.slice(0,16);
-      const iv=raw.slice(16,28);
-      const data=raw.slice(28);
-
-      const key=await deriveKey(password.value,salt);
-      const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv},key,data);
-      const txt=dec.decode(plain);
-
-      if(!txt.startsWith(SIGNATURE+"::")) throw 0;
-      output.value=txt.slice(SIGNATURE.length+2);
-      output.style.color="#0ff";
-
-    } else {
-      output.value=dec.decode(raw);
-      output.style.color="#0ff";
-    }
-
-  }catch{
-    output.value="❌ WRONG PASSWORD OR INVALID DATA";
-    output.style.color="#ff5555";
-  }
-}
-
-// ================= SHORT ENCODE/DECODE =================
-function encodeShort(){
-  errorMsg.textContent="";
-  if(!input.value){ errorMsg.textContent="Input required"; return; }
-  const data=enc.encode(input.value);
-  output.value=M2+"."+b64url(b64e(data));
-  output.style.color="#0ff";
-}
-
-function decodeShort(){
-  errorMsg.textContent="";
-  if(!input.value){ errorMsg.textContent="Input required"; return; }
-  try{
-    const str=input.value.trim();
-    if(!str.startsWith(M2+'.')) throw 0;
-    const raw=b64urld(str.slice(M2.length+1));
-    output.value=dec.decode(raw);
-    output.style.color="#0ff";
-  }catch{
-    output.value="❌ INVALID DATA";
-    output.style.color="#ff5555";
-  }
-}
-
-// ================= AUTO PROCESS =================
-async function autoProcess(){
-  if(!input.value) { output.value=""; return; }
-  if(input.value.startsWith(M2+'.')){
-    if(useEncrypt) await decrypt();
-    else decodeShort();
-  } else {
-    if(useEncrypt) await encrypt();
-    else encodeShort();
-  }
-}
-
-input.addEventListener("input", autoProcess);
-password.addEventListener("input", autoProcess);
 </script>
 
 </body>
 </html>
-
