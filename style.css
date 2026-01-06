@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Mono&family=Inter:wght@400;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+
+  /* Wallpaper */
+  background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSh3z_j4U5glerBcoCxHR1AGDxbpuVgKVw-0w&s');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+  /* Overlay dim for readability */
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.75); /* dim wallpaper so text is readable */
+  z-index: 0;
+}
+
+header {
+  text-align: center;
+  font-weight: 900;
+  font-size: 3rem;
+  padding: 30px 0;
+  letter-spacing: 0.4em;
+  color: #fff;
+  user-select: none;
+  z-index: 1;
+  position: relative;
+}
+
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 35px;
+  background: rgba(0,0,0,0.85); /* semi-transparent so wallpaper shows behind */
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  z-index: 1;
+  position: relative;
+}
+
+/* Inputs and Textarea */
+input, textarea {
+  background: rgba(0,0,0,0.8);
+  border: 1.5px solid #444;
+  color: #fff;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-family: 'Fira Mono', monospace;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+input:focus, textarea:focus {
+  border-color: #fff;
+  box-shadow: 0 0 12px #fff88, inset 0 0 8px #fff55;
+}
+
+/* Buttons */
+button {
+  min-width: 140px;
+  padding: 14px 0;
+  border-radius: 9999px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid #fff;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: #fff;
+  color: #000;
+  box-shadow: 0 0 25px #fff, 0 5px 20px rgba(255,255,255,0.3);
+}
+
+/* Overlay for Entry Password */
+#entryOverlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.95);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#entryOverlay h2 {
+  color: #fff;
+  font-family: 'Fira Mono', monospace;
+  font-size: 2.2rem;
+  margin-bottom: 20px;
+  letter-spacing: 0.2em;
+  text-align: center;
+}
+
+#entryOverlay input {
+  width: 300px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1.5px solid #222;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+  font-family: 'Fira Mono', monospace;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+#entryOverlay input:focus {
+  border-color: #fff;
+  box-shadow: 0 0 12px #fff88, inset 0 0 8px #fff55;
+}
+
+#entryOverlay button {
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-weight: 700;
+  border: 2px solid #fff;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+}
+
+#entryOverlay button:hover {
+  background: #fff;
+  color: #000;
+  box-shadow: 0 0 25px #fff, 0 5px 20px rgba(255,255,255,0.3);
+}
+
+#entryError {
+  color: #ff5555;
+  font-family: monospace;
+  margin-top: 8px;
+  letter-spacing: 0.05em;
+}
