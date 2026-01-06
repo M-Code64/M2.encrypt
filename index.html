@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MCODE</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fira+Mono&family=Inter&display=swap');
+*{box-sizing:border-box;}
+body{margin:0;background:#0b0b0b;color:#f2f2f2;font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;}
+header{text-align:center;font-weight:900;font-size:3rem;padding:28px 0;border-bottom:1px solid #222;letter-spacing:0.35em;color:#0ff;user-select:none;}
+.container{max-width:900px;margin:40px auto;padding:30px;background:#111;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,0.8);display:flex;flex-direction:column;gap:20px;}
+.password-row{display:flex;align-items:center;gap:16px;font-weight:600;font-size:0.9rem;color:#0ff;user-select:none;}
+.password-row span{min-width:120px;}
+.password-row input[type="password"],.password-row input[type="text"]{flex-grow:1;background:#000;border:1.5px solid #222;color:#0ff;padding:10px 14px;border-radius:10px;font-family:'Fira Mono',monospace;font-size:16px;outline:none;transition:border-color 0.3s ease;}
+.password-row input:focus{border-color:#0ff;box-shadow:0 0 10px #0ff88caa;}
+.show-pass{font-size:0.85rem;cursor:pointer;user-select:none;color:#0ff;opacity:0.7;transition:opacity 0.3s ease;}
+.show-pass:hover{opacity:1;}
+textarea{width:100%;height:180px;background:#000;border:1.5px solid #222;border-radius:14px;padding:18px 20px;font-family:'Fira Mono',monospace;font-size:16px;color:#0ff;resize:vertical;outline:none;box-shadow:inset 0 0 18px #000000cc;transition:border-color 0.3s ease, box-shadow 0.3s ease;}
+textarea::placeholder{color:#008080aa;font-style:italic;}
+textarea:focus{border-color:#0ff;box-shadow:0 0 20px #0ff88caa, inset 0 0 25px #0ff88c88;}
+.buttons{display:flex;justify-content:center;gap:40px;margin-top:4px;}
+button{min-width:140px;padding:14px 0;border-radius:9999px;font-size:16px;font-weight:700;cursor:pointer;border:none;user-select:none;transition:all 0.3s ease;box-shadow:0 5px 15px rgba(0,255,255,0.35);}
+button:active{transform:scale(0.96);}
+.encode{background:#000;color:#0ff;border:2px solid #0ff;text-transform:uppercase;letter-spacing:0.15em;box-shadow:0 0 15px #0ffccff7;}
+.encode:hover{background:#0ff;color:#000;box-shadow:0 0 25px #0ff;}
+.decode{background:#fff;color:#000;border:2px solid #0ff;text-transform:uppercase;letter-spacing:0.15em;box-shadow:0 0 15px #0ffccff7;}
+.decode:hover{background:#0ff;color:#000;box-shadow:0 0 25px #0ff;}
+.error-msg{color:#ff5555;font-weight:700;text-align:center;margin-top:10px;user-select:none;font-family:monospace;letter-spacing:0.1em;}
+@media(max-width:600px){.buttons{flex-direction:column;gap:16px;}button{width:100%;min-width:unset;}}
+
+/* Entry overlay */
+#entryOverlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;background:#0b0b0b;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;
+}
+#entryOverlay h2{color:#0ff;font-family:'Fira Mono',monospace;font-size:2rem;margin-bottom:20px;letter-spacing:0.2em;}
+#entryOverlay input{width:280px;padding:14px 16px;border-radius:10px;border:1.5px solid #222;background:#000;color:#0ff;font-size:16px;outline:none;font-family:'Fira Mono',monospace;margin-bottom:14px;}
+#entryOverlay button{padding:12px 20px;border-radius:999px;font-weight:700;border:2px solid #0ff;background:#000;color:#0ff;cursor:pointer;transition:all 0.3s ease;box-shadow:0 0 12px #0ff;}
+#entryOverlay button:hover{background:#0ff;color:#000;box-shadow:0 0 20px #0ff;}
+#entryError{color:#ff5555;font-family:monospace;margin-top:8px;}
+</style>
+</head>
+<body>
+
+<div id="entryOverlay">
+  <h2>ENTER SITE PASSWORD</h2>
+  <input type="password" id="sitePassword" placeholder="Entry Password" autocomplete="off"/>
+  <button onclick="checkEntry()">ENTER</button>
+  <div id="entryError"></div>
+</div>
+
+<header>MCODE</header>
+
+<div class="container">
+
+  <div class="password-row">
+    <span>Encode Password:</span>
+    <input type="password" id="password" placeholder="Required" autocomplete="off" />
+    <label class="show-pass" title="Show/hide encode password">
+      <input type="checkbox" onclick="togglePass()" /> show
+    </label>
+  </div>
+
+  <textarea id="input" placeholder="Enter text here..."></textarea>
+
+  <div class="buttons">
+    <button class="encode" onclick="encode()">Encode</button>
+    <button class="decode" onclick="decode()">Decode</button>
+  </div>
+
+  <textarea id="output" placeholder="Output will appear here..." readonly></textarea>
+
+  <div id="errorMsg" class="error-msg"></div>
+
+</div>
+
+<script>
+// ----- Entry Password Overlay -----
+const ENTRY_PASSWORD = 'MC64';
+const entryOverlay = document.getElementById('entryOverlay');
+const entryError = document.getElementById('entryError');
+
+function checkEntry(){
+  const val = document.getElementById('sitePassword').value.trim();
+  if(val === ENTRY_PASSWORD){
+    localStorage.setItem('entryOk', 'true');
+    entryOverlay.style.display = 'none';
+  }else{
+    entryError.textContent = 'Wrong entry password!';
+  }
+}
+
+window.addEventListener('load',()=>{
+  if(localStorage.getItem('entryOk') === 'true'){
+    entryOverlay.style.display = 'none';
+  }
+});
+
+// Toggle encode password visibility
+function togglePass(){
+  const p = document.getElementById('password');
+  p.type = (p.type === "password") ? "text" : "password";
+}
+
+// ---- Ciphers ----
+const caesar = (str, shift) => str.replace(/[a-zA-Z]/g, c=>{
+  const base = c <= 'Z' ? 65 : 97;
+  return String.fromCharCode((c.charCodeAt(0) - base + shift + 26) % 26 + base);
+});
+
+function vigenere(str,key,decode=false){
+  if(!key) return str;
+  let j=0; const kLen=key.length;
+  return str.replace(/[a-zA-Z]/g,c=>{
+    let k=key[j++%kLen].toLowerCase().charCodeAt(0)-97;
+    if(decode) k=26-k;
+    const base=c<='Z'?65:97;
+    return String.fromCharCode((c.charCodeAt(0)-base+k)%26+base);
+  });
+}
+
+function xorCipher(str,key){
+  if(!key) return str;
+  let out=''; for(let i=0;i<str.length;i++) out+=String.fromCharCode(str.charCodeAt(i)^key.charCodeAt(i%key.length));
+  return out;
+}
+
+function shuffle(str){ let out=''; for(let i=0;i<str.length;i++) out+=String.fromCharCode((str.charCodeAt(i)+(i%7))%256); return out; }
+function unshuffle(str){ let out=''; for(let i=0;i<str.length;i++) out+=String.fromCharCode((str.charCodeAt(i)-(i%7)+256)%256); return out; }
+
+function utf8ToBase64(str){
+  const encoder=new TextEncoder(); const bytes=encoder.encode(str); let binary=''; for(const b of bytes) binary+=String.fromCharCode(b); return btoa(binary);
+}
+function base64ToUtf8(b64){
+  const binary=atob(b64); const bytes=new Uint8Array(binary.length); for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i); const decoder=new TextDecoder(); return decoder.decode(bytes);
+}
+
+// ----- Encode/Decode -----
+function clearError(){document.getElementById('errorMsg').textContent='';}
+
+function encode(){
+  clearError();
+  let pass=document.getElementById('password').value.trim();
+  if(!pass){document.getElementById('errorMsg').textContent='Password is required!'; return;}
+  let text=document.getElementById('input').value;
+
+  let data=utf8ToBase64(text);
+  // Layer 1
+  data=caesar(data,8);
+  data=vigenere(data,pass);
+  data=xorCipher(data,pass);
+  // Layer 2
+  data=shuffle(data);
+  const revPass=pass.split('').reverse().join('');
+  data=xorCipher(data,revPass);
+  data=vigenere(data,revPass);
+
+  // Final base64 + Caesar(2+3)
+  data=btoa(data);
+  data=caesar(data,2);
+  data=caesar(data,3);
+
+  const output=document.getElementById('output');
+  output.value=data;
+  output.style.color="#0ff"; // normal color
+}
+
+function decode(){
+  clearError();
+  let pass=document.getElementById('password').value.trim();
+  if(!pass){document.getElementById('errorMsg').textContent='Password is required!'; return;}
+
+  let text=document.getElementById('input').value.trim();
+  if(!text){document.getElementById('output').value=''; return;}
+
+  try{
+    text=caesar(text,-3);
+    text=caesar(text,-2);
+    text=atob(text);
+
+    const revPass=pass.split('').reverse().join('');
+    text=vigenere(text,revPass,true);
+    text=xorCipher(text,revPass);
+    text=unshuffle(text);
+    text=xorCipher(text,pass);
+    text=vigenere(text,pass,true);
+    text=caesar(text,-8);
+
+    text=base64ToUtf8(text);
+
+    const output=document.getElementById('output');
+    output.value=text;
+
+    // Simple gibberish detection: if mostly non-printable → red
+    const nonPrintable=text.replace(/[\x20-\x7E]/g,'').length;
+    const ratio=nonPrintable/text.length;
+    output.style.color=(ratio>0.25) ? '#ff5555' : '#0ff';
+
+  }catch{
+    // fallback in case of severe corruption
+    const output=document.getElementById('output');
+    output.value=text;
+    output.style.color='#ff5555';
+  }
+}
+</script>
+</body>
+</html>
